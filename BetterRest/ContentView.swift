@@ -9,7 +9,7 @@ import CoreML
 import SwiftUI
 
 struct ContentView: View {
-    @State private var wakeUp = Date.now
+    @State private var wakeUp = defaultWakeTime
     @State private var sleepAmount = 6.0
     @State private var coffeeAmount = 1
     
@@ -18,23 +18,35 @@ struct ContentView: View {
     @State private var alertMessage = ""
     @State private var showingAlert = false
     
+    static var defaultWakeTime: Date {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        
+        return Calendar.current.date(from: components) ?? Date.now
+    }
+    
     var body: some View {
         NavigationStack {
-            VStack {
-                Text("When do you want to wake up?")
-                    .font(.headline)
-                DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
+            Form {
+//                Text("When do you want to wake up?")
+//                    .font(.headline)
+                Section("When do you want to wake up?") {
+                    DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                }
                 
-                Text("Desired amount of sleep")
-                    .font(.headline)
-                Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.5)
-                    .padding(.horizontal)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Desired amount of sleep")
+                        .font(.headline)
+                    Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.5)
+                }
                 
-                Text("Daily coffee intake")
-                    .font(.headline)
-                Stepper("\(coffeeAmount) cup(s)", value: $coffeeAmount, in: 1...20, step: 1)
-                    .padding(.horizontal)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Daily coffee intake")
+                        .font(.headline)
+                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20, step: 1)
+                }
             }
             .navigationTitle("Better Rest")
             .toolbar {
@@ -65,7 +77,7 @@ struct ContentView: View {
             let sleepTime = wakeUp - prediction.actualSleep
             
             alertTitle = "Your ideal bedtime is..."
-//            alertMessage = "\(sleepTime)"
+            //            alertMessage = "\(sleepTime)"
             alertMessage = sleepTime.formatted(date: .omitted, time: .shortened)
             
         }
